@@ -16,6 +16,7 @@ def menu():
     while user_input != 'q':
         if user_input == 'a':
             database.add_book()
+            user_input = input(USER_CHOICE)
         elif user_input == 'l':
             database.list_all_books()
             user_input = input(USER_CHOICE)
@@ -24,6 +25,7 @@ def menu():
             user_input = input(USER_CHOICE)
         elif user_input == 'd':
             database.delete_book()
+            user_input = input(USER_CHOICE)
         elif user_input == 'q':
             exit()
 

@@ -15,7 +15,14 @@ books = [
 
 
 def add_book():
-    pass
+    new_name = input('What is the name of the book you want to add? ')
+    for book in books:
+        if book['name'] == new_name:
+            print('This book already exists in the collection')
+            return
+    new_author = input('Who is the author?')
+    books.append({'name': new_name, 'author': new_author, 'read': False})
+    print(f'Book {new_name} added to the list')
 
 
 def list_all_books():
@@ -41,3 +48,4 @@ def mark_as_read():
 def delete_book():
     book_to_delete = input('Which book would you like to delete?')
     utils.database.books = [book for book in utils.database.books if book['name'] != book_to_delete]
+    print(f'Book {book_to_delete} was removed from the collection')
