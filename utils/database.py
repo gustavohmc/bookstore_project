@@ -1,51 +1,65 @@
-import utils.database
-
-books = [
-    {
-        'name': 'Foundation',
-        'author': 'Isaac Azimov',
-        'read': False
-    },
-    {
-        'name': 'Brave New World',
-        'author': 'Aldous Huxley',
-        'read': False
-    }
-]
+books_file = './utils/books.csv'
 
 
 def add_book():
     new_name = input('What is the name of the book you want to add? ')
-    for book in books:
-        if book['name'] == new_name:
-            print('This book already exists in the collection')
-            return
+    with open(books_file, 'r') as file:
+        lines = [line.strip().split(',') for line in file.readlines()]
+        for line in lines:
+            if line[0] == new_name:
+                print(f'This book is already in the collection')
+                return
     new_author = input('Who is the author?')
-    books.append({'name': new_name, 'author': new_author, 'read': False})
-    print(f'Book {new_name} added to the list')
+    with open(books_file, 'a') as file:
+        file.write(f'{new_name},{new_author},"No"\n')
 
 
 def list_all_books():
+    with open(books_file, 'r') as file:
+        lines = [line.strip().split(',') for line in file.readlines()]
+
+    books = [
+        {'name': line[0], 'author': line[1], 'read': line[2]}
+        for line in lines
+    ]
     for book in books:
-        print(f'Title: {book["name"]}, Author: {book["author"]}, Read: {"Yed" if book["read"] else "No"}')
+        print(f'Title: {book["name"]}, Author: {book["author"]}, Read: {book["read"]}')
 
 
 def mark_as_read():
     book_to_update = input('Which book should I mark as read? ')
+    with open(books_file, 'r') as file:
+        lines = [line.strip().split(',') for line in file.readlines()]
+
+    books = [
+        {'name': line[0], 'author': line[1], 'read': line[2]}
+        for line in lines
+    ]
+
     for book in books:
         if book['name'] == book_to_update:
-            if book['read']:
-                print('This book is already marked as read')
-            else:
-                book['read'] = True
-                print(f'Book {book_to_update} was marked as read')
-            return
+            book['read'] = 'Yes'
+    _save_all_books(books)
 
-    else:
-        print(f'There is no book named {book_to_update} in the database')
+
+def _save_all_books(books):
+    with open(books_file, 'w') as file:
+        for book in books:
+            file.write(f"{book['name']},{book['author']}, {book['read']}\n")
 
 
 def delete_book():
     book_to_delete = input('Which book would you like to delete?')
-    utils.database.books = [book for book in utils.database.books if book['name'] != book_to_delete]
-    print(f'Book {book_to_delete} was removed from the collection')
+    with open(books_file, 'r') as file:
+        lines = [line.strip().split(',') for line in file.readlines()]
+
+    books = [
+        {'name': line[0], 'author': line[1], 'read': line[2]}
+        for line in lines
+    ]
+
+    for book in books:
+        if book['name'] == book_to_delete:
+            books.remove(book)
+            print(f'{book_to_delete} was removed from the collection')
+            _save_all_books(books)
