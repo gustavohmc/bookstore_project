@@ -1,4 +1,6 @@
-books_file = './utils/books.csv'
+import json
+
+books_file = './utils/books.json'
 
 
 def add_book():
@@ -12,6 +14,11 @@ def add_book():
     new_author = input('Who is the author?')
     with open(books_file, 'a') as file:
         file.write(f'{new_name},{new_author},"No"\n')
+
+
+def get_all_books():
+    with open(books_file, 'r') as file:
+        return json.load(file)
 
 
 def list_all_books():
