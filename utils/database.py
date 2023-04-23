@@ -1,19 +1,26 @@
-import json
+import sqlite3
 
 books_file = './utils/books.json'
 
 
-def add_book():
-    new_name = input('What is the name of the book you want to add? ')
-    with open(books_file, 'r') as file:
-        lines = [line.strip().split(',') for line in file.readlines()]
-        for line in lines:
-            if line[0] == new_name:
-                print(f'This book is already in the collection')
-                return
-    new_author = input('Who is the author?')
-    with open(books_file, 'a') as file:
-        file.write(f'{new_name},{new_author},"No"\n')
+def create_book_table():
+    connection = sqlite3.connect('data.db')
+    cursor = connection.cursor()
+
+    cursor.execute('CREATE TABLE IF NOT EXISTS Books(name text, author text, read integer)')
+
+    connection.commit()
+    connection.close()
+
+
+def add_book(name, author):
+    connection = sqlite3.connect('data.db')
+    cursor = connection.cursor()
+
+    cursor.execute('INSERT INTO books VALUES(?, ?, 0)', (name, author))
+
+    connection.commit()
+    connection.close()
 
 
 def get_all_books():
@@ -21,52 +28,20 @@ def get_all_books():
         return json.load(file)
 
 
-def list_all_books():
-    with open(books_file, 'r') as file:
-        lines = [line.strip().split(',') for line in file.readlines()]
-
-    books = [
-        {'name': line[0], 'author': line[1], 'read': line[2]}
-        for line in lines
-    ]
+def mark_as_read(name):
+    books = get_all_books()
     for book in books:
-        print(f'Title: {book["name"]}, Author: {book["author"]}, Read: {book["read"]}')
-
-
-def mark_as_read():
-    book_to_update = input('Which book should I mark as read? ')
-    with open(books_file, 'r') as file:
-        lines = [line.strip().split(',') for line in file.readlines()]
-
-    books = [
-        {'name': line[0], 'author': line[1], 'read': line[2]}
-        for line in lines
-    ]
-
-    for book in books:
-        if book['name'] == book_to_update:
-            book['read'] = 'Yes'
+        if book['name'] == name:
+            book['read'] = True
     _save_all_books(books)
 
 
 def _save_all_books(books):
     with open(books_file, 'w') as file:
-        for book in books:
-            file.write(f"{book['name']},{book['author']}, {book['read']}\n")
+        json.dump(books, file)
 
 
-def delete_book():
-    book_to_delete = input('Which book would you like to delete?')
-    with open(books_file, 'r') as file:
-        lines = [line.strip().split(',') for line in file.readlines()]
-
-    books = [
-        {'name': line[0], 'author': line[1], 'read': line[2]}
-        for line in lines
-    ]
-
-    for book in books:
-        if book['name'] == book_to_delete:
-            books.remove(book)
-            print(f'{book_to_delete} was removed from the collection')
-            _save_all_books(books)
+def delete_book(name):
+    books = get_all_books()
+    books = [book for book in books if book['name'] != name]
+    _save_all_books(books)
